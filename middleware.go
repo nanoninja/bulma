@@ -13,7 +13,7 @@ import "net/http"
 //        fmt.Fprintf(rw, "Welcome to the home page!")
 //    })
 //
-//    mw := bulma.Middleware("john", "doe", bulma.DefaultRealm)
+//    mw := bulma.Middleware("username", "password", bulma.DefaultRealm)
 //
 //    http.ListenAndServe(":3000", mw(mux))
 func Middleware(user, pass, realm string) func(http.Handler) http.Handler {
@@ -30,7 +30,7 @@ func Middleware(user, pass, realm string) func(http.Handler) http.Handler {
 //    })
 //
 //    f := func(user, pass) bool {
-//        return user == "john" && pass == "doe"
+//        return user == "username" && pass == "password"
 //    }
 //
 //    mw := bulma.MiddlewareFunc(f, bulma.DefaultRealm)
