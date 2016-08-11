@@ -1,4 +1,4 @@
-# Bulma    [![Build Status](https://travis-ci.org/nanoninja/bulma.svg)](https://travis-ci.org/nanoninja/bulma) [![go-doc](https://godoc.org/github.com/nanoninja/bulma?status.svg)](https://godoc.org/github.com/nanoninja/bulma)
+# Bulma    [![Build Status](https://travis-ci.org/nanoninja/bulma.svg)](https://travis-ci.org/nanoninja/bulma) [![coverage](https://img.shields.io/badge/coverage-100%-brightgreen.svg?style=flat)](http://gocover.io/github.com/nanoninja/bulma) [![go-doc](https://godoc.org/github.com/nanoninja/bulma?status.svg)](https://godoc.org/github.com/nanoninja/bulma)
 
 Basic authentication implementation for Go.
 
