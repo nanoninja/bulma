@@ -36,8 +36,8 @@ func Middleware(user, pass, realm string) func(http.Handler) http.Handler {
 //    mw := bulma.MiddlewareFunc(f, bulma.DefaultRealm)
 //
 //    http.ListenAndServe(":3000", mw(mux))
-func MiddlewareFunc(f BasicAuthFunc, realm string) func(http.Handler) http.Handler {
+func MiddlewareFunc(a Authentifier, realm string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return BasicAuthHandler(f, next, realm)
+		return BasicAuthHandler(a, next, realm)
 	}
 }

@@ -10,6 +10,15 @@ import "net/http"
 // DefaultRealm is the authentication message by default.
 const DefaultRealm = "Authorization Required"
 
+// Authentifier interface is used by basic HTTP authentication handler.
+type Authentifier interface {
+	// Authenticate checks the permissions to access the website.
+	Authenticate(r *http.Request) bool
+
+	// RequireAuth asks user credentials.
+	RequireAuth(rw http.ResponseWriter, realm string)
+}
+
 // BasicAuthFunc represents the authentication credentials.
 type BasicAuthFunc func(username, password string) bool
 
@@ -39,7 +48,7 @@ func (f BasicAuthFunc) Authenticate(r *http.Request) bool {
 }
 
 type basicAuthHandler struct {
-	auth  BasicAuthFunc
+	auth  Authentifier
 	realm string
 	next  http.Handler
 }
@@ -69,9 +78,9 @@ type basicAuthHandler struct {
 //        http.Handle("/sesame", handler)
 //        http.ListenAndServe(":3000", nil)
 //    }
-func BasicAuthHandler(f BasicAuthFunc, h http.Handler, realm string) http.Handler {
+func BasicAuthHandler(a Authentifier, h http.Handler, realm string) http.Handler {
 	return &basicAuthHandler{
-		auth:  f,
+		auth:  a,
 		next:  h,
 		realm: realm,
 	}
