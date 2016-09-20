@@ -10,6 +10,8 @@ import "net/http"
 // DefaultRealm is the authentication message by default.
 const DefaultRealm = "Authorization Required"
 
+var _ Authentifier = (*BasicAuthFunc)(nil)
+
 // Authentifier interface is used by basic HTTP authentication handler.
 type Authentifier interface {
 	// Authenticate checks the permissions to access the website.
