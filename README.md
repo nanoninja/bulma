@@ -2,7 +2,10 @@
 
 Basic authentication implementation for Go.
 
-[![license](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/nanoninja/bulma/blob/master/LICENSE) [![godoc](https://godoc.org/github.com/nanoninja/bulma?status.svg)](https://godoc.org/github.com/nanoninja/bulma) [![build Status](https://travis-ci.org/nanoninja/bulma.svg)](https://travis-ci.org/nanoninja/bulma)  [![Go Report Card](https://goreportcard.com/badge/github.com/nanoninja/bulma)](https://goreportcard.com/report/github.com/nanoninja/bulma) [![codebeat](https://codebeat.co/badges/58e89ce4-2fd8-4a93-b624-afdbbb44a6e3)](https://codebeat.co/projects/github-com-nanoninja-bulma)
+[![license](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://github.com/nanoninja/bulma/blob/master/LICENSE) [![godoc](https://godoc.org/github.com/nanoninja/bulma?status.svg)](https://godoc.org/github.com/nanoninja/bulma)
+[![build Status](https://travis-ci.org/nanoninja/bulma.svg)](https://travis-ci.org/nanoninja/bulma)
+[![Coverage Status](https://coveralls.io/repos/github/nanoninja/bulma/badge.svg?branch=master)](https://coveralls.io/github/nanoninja/bulma?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/nanoninja/bulma)](https://goreportcard.com/report/github.com/nanoninja/bulma) [![codebeat](https://codebeat.co/badges/58e89ce4-2fd8-4a93-b624-afdbbb44a6e3)](https://codebeat.co/projects/github-com-nanoninja-bulma)
 
 ## Installation
 
