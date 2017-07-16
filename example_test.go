@@ -5,9 +5,10 @@
 package bulma_test
 
 import (
-	"bulma"
 	"fmt"
 	"net/http"
+
+	"github.com/nanoninja/bulma"
 )
 
 func Example() {
