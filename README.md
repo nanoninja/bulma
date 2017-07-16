@@ -44,6 +44,25 @@ func main() {
 
 [Open your favorite browser](http://localhost:3000/admin)
 
+## Using a function as validator
+
+```go
+func main() {
+    onSuccess := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Dashboard")
+    })
+
+    validator := bulma.ValidateFunc(func(c *bulma.Credential) bool {
+        return c.Authorization && c.Username == "foo" && c.Password == "bar"
+    })
+
+    ba := bulma.BasicAuth(bulma.Realm, onSuccess, validator)
+
+    http.Handle("/admin", ba)
+    http.ListenAndServe(":3000", nil)
+}
+```
+
 ## Using configuration
 The configuration allows you to set up HTTP authentication.
 
@@ -84,6 +103,14 @@ func main() {
 To create a validator, use bulma.Validator interface.
 
 ```go
+type Validator interface {
+    Validate(*Credential) bool
+}
+```
+
+Example :
+
+```go
 type MyValidator struct {
     username, password string
 }
@@ -97,6 +124,10 @@ Using your own validator
 
 ```go
 func main() {
+    onSuccess := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Dashboard")
+    })
+
     ba := bulma.BasicAuth("MyRealm", onSuccess, MyValidator{"foo", "bar"})
 
     http.Handle("/admin", ba)
