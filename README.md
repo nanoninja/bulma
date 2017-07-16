@@ -9,63 +9,98 @@ Basic authentication implementation for Go.
 
 ## Installation
 
-    go get github.com/nanoninja/bulma
+```sh
+go get github.com/nanoninja/bulma
+```
 
 ## Getting started
-
 After installing Go and setting up your
 [GOPATH](http://golang.org/doc/code.html#GOPATH), create your first `.go` file.
 
-``` go
+```go
 package main
 
 import (
-	"fmt"
-	"net/http"
+    "fmt"
+    "net/http"
 
-	"github.com/nanoninja/bulma"
+    "github.com/nanoninja/bulma"
 )
 
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(rw, "Welcome to the home page!")
-	})
+    onSuccess := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Dashboard")
+    })
 
-    ba := bulma.BasicAuth("username", "password")
-	handler := bulma.BasicAuthHandler(ba, mux, bulma.DefaultRealm)
+    ba := bulma.BasicAuth(bulma.Realm, onSuccess, bulma.User{
+        "foo": "bar",
+        "bar": "foo",
+    })
 
-	http.ListenAndServe(":3000", handler)
+    http.Handle("/admin", ba)
+    http.ListenAndServe(":3000", nil)
 }
 ```
 
-## Using callback
+[Open your favorite browser](http://localhost:3000/admin)
 
-Enfore basic authentication by providing a BasicAuthFunc,
-which must return true in order to gain access.
-``` go
-package main
+## Using configuration
+The configuration allows you to set up HTTP authentication.
 
-import (
-	"fmt"
-	"net/http"
+```go
+type Config struct {
+    Realm string
+    Validator Validator
+    Success http.Handler
+    Error http.Handler
+}
+```
 
-	"github.com/nanoninja/bulma"
-)
+Example :
 
+```go
 func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(rw, "Welcome to the home page!")
-	})
+    onSuccess := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Dashboard")
+    })
 
-    f := func(user, pass string) bool {
-        return user == "username" && pass == "password"
-    }
+    onError := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "My Custom Error Handler")
+    })
 
-	handler := bulma.BasicAuthHandler(f, mux, bulma.DefaultRealm)
+    ba := bulma.New(&bulma.Config{
+        Realm:     "MyRealm",
+        Validator: bulma.Auth("foo", "bar"),
+        Success:   onSuccess,
+        Error:     onError,
+    })
 
-	http.ListenAndServe(":3000", handler)
+    http.Handle("/admin", ba)
+    http.ListenAndServe(":3000", nil)
+}
+```
+
+## Creating Validator
+To create a validator, use bulma.Validator interface.
+
+```go
+type MyValidator struct {
+    username, password string
+}
+
+func (v MyValidator) Validate(c *bulma.Credential) bool {
+    return c.Authorization && v.username == c.Username && v.password == c.Password
+}
+```
+
+Using your own validator
+
+```go
+func main() {
+    ba := bulma.BasicAuth("MyRealm", onSuccess, MyValidator{"foo", "bar"})
+
+    http.Handle("/admin", ba)
+    http.ListenAndServe(":3000", nil)
 }
 ```
 

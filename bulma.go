@@ -1,97 +1,90 @@
-// Copyright 2016 The Nanoninja Authors. All rights reserved.
+// Copyright 2017 The Bulma Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
 // Package bulma provides HTTP Basic Auth.
 package bulma
 
-import "net/http"
+import (
+	"net/http"
+)
 
-// DefaultRealm is the authentication message by default.
-const DefaultRealm = "Authorization Required"
+// Realm is the authenticate message to require authorization.
+// See RFC 2617, section 1.2.
+var Realm = "Authorization Required"
 
-var _ Authentifier = (*BasicAuthFunc)(nil)
+// Config is used to configure the basic auth handler.
+type Config struct {
+	// Realm Default is "Authorization Required"
+	// See RFC 2617, section 1.2.
+	Realm string
 
-// Authentifier interface is used by basic HTTP authentication handler.
-type Authentifier interface {
-	// Authenticate checks the permissions to access the website.
-	Authenticate(r *http.Request) bool
+	// Validator is the interface indicating the type implementing it
+	// supports credentials validation.
+	Validator Validator
 
-	// RequireAuth asks user credentials.
-	RequireAuth(rw http.ResponseWriter, realm string)
+	// Success will be used if the authentication succeeded.
+	Success http.Handler
+
+	// Error will be used if authentication fails.
+	Error http.Handler
 }
 
-// BasicAuthFunc represents the authentication credentials.
-type BasicAuthFunc func(username, password string) bool
+type basicAuth struct {
+	config *Config
+}
 
-// BasicAuth is a helper that wraps
-// a call to a function returning BasicAuthFunc.
-func BasicAuth(username, password string) BasicAuthFunc {
-	return func(user, pass string) bool {
-		return username == user && password == pass
+// New returns an http handler from a given configuration.
+func New(c *Config) http.Handler {
+	if c.Realm == "" {
+		c.Realm = Realm
 	}
+	return &basicAuth{c}
 }
 
-// RequireAuth sets the response Authorization header to use HTTP
-// Basic Authentication with the provided username and password.
-//
-// With HTTP Basic Authentication the provided
-// username and password are not encrypted.
-func (f BasicAuthFunc) RequireAuth(rw http.ResponseWriter, realm string) {
-	rw.Header().Set("WWW-Authenticate", `Basic realm="`+realm+`"`)
-	rw.WriteHeader(401)
-}
-
-// Authenticate returns true if and only if
-// the authentication credentials are valid.
-func (f BasicAuthFunc) Authenticate(r *http.Request) bool {
+func (b *basicAuth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	username, password, ok := r.BasicAuth()
-	return ok && f(username, password)
-}
+	credential := Credential{username, password, ok}
 
-type basicAuthHandler struct {
-	auth  Authentifier
-	realm string
-	next  http.Handler
-}
+	var next http.Handler
 
-// BasicAuthHandler returns a handler that serves basic authentication HTTP.
-//
-// The typical use case for BasicAuthHandler is to register a
-// BasicAuthFunc function.
-//
-//    package main
-//
-//    import (
-//        "net/http"
-//
-//        "github.com/nanoninja/bulma"
-//    )
-//
-//    func main() {
-//        auth := bulma.BasicAuth("foo", "bar")
-//
-//        next := http.Handlerfunc(rw http.ResponseWriter, r *http.Request) {
-//            rw.Write([]byte("Open sesame"))
-//        })
-//
-//        handler := bulma.BasicAuthHandler(auth, next)
-//
-//        http.Handle("/sesame", handler)
-//        http.ListenAndServe(":3000", nil)
-//    }
-func BasicAuthHandler(a Authentifier, h http.Handler, realm string) http.Handler {
-	return &basicAuthHandler{
-		auth:  a,
-		next:  h,
-		realm: realm,
-	}
-}
-
-func (h *basicAuthHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
-	if !h.auth.Authenticate(r) {
-		h.auth.RequireAuth(rw, h.realm)
+	if b.config.Validator != nil && b.config.Validator.Validate(&credential) {
+		next = b.config.Success
+	} else if b.config.Error != nil {
+		next = err(b.config.Realm, b.config.Error)
 	} else {
-		h.next.ServeHTTP(rw, r)
+		next = require(b.config.Realm)
 	}
+
+	next.ServeHTTP(w, r)
+}
+
+// BasicAuth is a simple wrapper of New.
+func BasicAuth(realm string, success http.Handler, v Validator) http.Handler {
+	return New(&Config{
+		Realm:     realm,
+		Success:   success,
+		Validator: v,
+	})
+}
+
+// require returns a Handler that authenticates user.
+func require(realm string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		writeHeader(w, realm)
+		w.Write([]byte(http.StatusText(http.StatusUnauthorized)))
+	})
+}
+
+// writeHeader replies to the request with the authentication header.
+func writeHeader(w http.ResponseWriter, realm string) {
+	w.Header().Add("WWW-Authenticate", `Basic realm="`+realm+`"`)
+	w.WriteHeader(http.StatusUnauthorized)
+}
+
+func err(realm string, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		writeHeader(w, realm)
+		h.ServeHTTP(w, r)
+	})
 }
