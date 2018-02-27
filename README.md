@@ -43,8 +43,6 @@ func main() {
 }
 ```
 
-[Open your favorite browser](http://localhost:3000/admin)
-
 ## Using a function as validator
 
 ```go
