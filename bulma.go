@@ -44,7 +44,11 @@ func New(c *Config) http.Handler {
 
 func (b *basicAuth) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	username, password, ok := r.BasicAuth()
-	credential := Credential{username, password, ok}
+	credential := Credential{
+		Username:      username,
+		Password:      password,
+		Authorization: ok,
+	}
 
 	var next http.Handler
 
