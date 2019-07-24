@@ -131,10 +131,6 @@ func main() {
 }
 ```
 
-## Social
-
-[![](https://img.shields.io/twitter/url/https/github.com/nanoninja/bulma.svg?style=social)](https://twitter.com/vlworld)
-
 ## License
 
 Bulma is licensed under the Creative Commons Attribution 3.0 License, and code is licensed under a [BSD license](https://github.com/nanoninja/bulma/blob/master/LICENSE).
